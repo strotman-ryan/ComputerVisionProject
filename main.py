@@ -6,6 +6,14 @@ import numpy as np
 
 camera = PiCamera()
 
+def ImagedDifference(img1, img2, threshold):
+    difference = img1 - img2
+    difference = np.absolute(difference)
+    difference = Standardize(difference)
+    difference[difference > threshold] = 1
+    difference[difference <= threshold] = 0
+    return difference
+
 
 def CaptureImage(name):
     camera.start_preview()
@@ -18,6 +26,13 @@ def Standardize(image):
     xMax = image.max()
     return (image - xMin) /(xMax - xMin)
 
+videoPath = './Images/video.h264'
+camera.resolution = (640, 480)
+camera.start_recording(videoPath)
+camera.wait_recording(10)
+camera.stop_recording()
+
+'''
 firstImagePath = './Images/first.png'
 secondImagePath = './Images/second.png'
 CaptureImage(firstImagePath)
@@ -36,4 +51,5 @@ difference[difference > threshold] = 1
 difference[difference <= threshold] = 0
 cv2.imshow("difference", difference)
 cv2.imshow(firstImagePath,firstImage)
-cv2.cv2.waitKey(0)  
+
+'''
