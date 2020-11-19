@@ -6,6 +6,9 @@ __pycache__/
 #vscode
 .vscode/
 
+#Images
+Images/
+
 # C extensions
 *.so
 
