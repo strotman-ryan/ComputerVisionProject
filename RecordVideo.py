@@ -12,7 +12,7 @@ videoPath = './Video/video.h264'
 camera.resolution = (1280, 720)
 print("starting recording")
 camera.start_recording(videoPath)
-camera.wait_recording(25)
+camera.wait_recording(10)
 camera.stop_recording()
 print("end of recording")
 
