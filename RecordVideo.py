@@ -10,6 +10,8 @@ camera = PiCamera()
 
 videoPath = './Video/video.h264'
 camera.resolution = (1280, 720)
+camera.start_preview()
+sleep(3)
 print("starting recording")
 camera.start_recording(videoPath)
 camera.wait_recording(10)
