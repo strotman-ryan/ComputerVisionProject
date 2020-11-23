@@ -26,7 +26,7 @@ def Standardize(image):
     xMax = image.max()
     return (image - xMin) /(xMax - xMin)
 
-videoPath = './Images/video.h264'
+videoPath = './Video/video.h264'
 camera.resolution = (640, 480)
 camera.start_recording(videoPath)
 camera.wait_recording(10)
