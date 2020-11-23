@@ -1,5 +1,4 @@
 
-from picamera import PiCamera
 from time import sleep
 import cv2 
 import numpy as np
@@ -17,7 +16,7 @@ def ImagedDifference(img1, img2, threshold):
     difference[difference <= threshold] = 0
     return difference
 
-video_path = "./Images/video.h264"
+video_path = "./Video/video.h264"
 video_object = cv2.VideoCapture(video_path)
 
 frames = []
