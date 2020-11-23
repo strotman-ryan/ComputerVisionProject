@@ -23,7 +23,6 @@ video_object = cv2.VideoCapture(video_path)
 frames = []
 ret,frame = video_object.read() 
 while(ret) :
-    
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frames.append(gray)
     ret,frame = video_object.read()  
