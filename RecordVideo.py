@@ -6,6 +6,17 @@ import numpy as np
 
 camera = PiCamera()
 
+
+
+videoPath = './Video/video.h264'
+camera.resolution = (1280, 720)
+print("starting recording")
+camera.start_recording(videoPath)
+camera.wait_recording(25)
+camera.stop_recording()
+print("end of recording")
+
+'''
 def ImagedDifference(img1, img2, threshold):
     difference = img1 - img2
     difference = np.absolute(difference)
@@ -26,13 +37,7 @@ def Standardize(image):
     xMax = image.max()
     return (image - xMin) /(xMax - xMin)
 
-videoPath = './Video/video.h264'
-camera.resolution = (1280, 720)
-camera.start_recording(videoPath)
-camera.wait_recording(25)
-camera.stop_recording()
 
-'''
 firstImagePath = './Images/first.png'
 secondImagePath = './Images/second.png'
 CaptureImage(firstImagePath)
