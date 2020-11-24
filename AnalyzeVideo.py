@@ -37,7 +37,7 @@ def ImagedDifference(img1, img2, threshold):
     difference[difference <= threshold] = 0
     return difference
 
-video_path = "./Video/video.h264"
+video_path = "./Video/video2.h264"
 video_object = cv2.VideoCapture(video_path)
 
 yiqFrames = []
@@ -56,8 +56,7 @@ while(ret) :
     cv2.imshow("Frame", frame)
     '''
     #140 250
-    #if numFrames % 10 ==0 and numFrames >= 140 and numFrames <= 250:
-    if numFrames == 160:
+    if numFrames % 10 ==0 and numFrames >= 140 and numFrames <= 250:
         cv2.imshow("FrameRGB: " + str(numFrames), rgbFrames[-1])
         difference = ImagedDifference(yiqFrames[0], yiqFrames[-1], .05) 
         cv2.imshow("FrameDifference: " + str(numFrames),difference)
@@ -70,7 +69,6 @@ while(ret) :
             print(stats)
         else:
             print("Frame "  +str(numFrames)  + " not valid")
-        break
 
     ret,frame = video_object.read()  
 
