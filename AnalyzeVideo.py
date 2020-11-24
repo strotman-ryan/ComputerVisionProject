@@ -48,15 +48,16 @@ while(ret) :
     numFrames += 1
     rgbFrames.append(frame)
     yiqFrames.append(rgb2yiq(frame))
+    '''
     # Press Q on keyboard to  exit
     #this makes the video play for some reason
-    '''
     if cv2.waitKey(25) & 0xFF == ord('q'): 
       break
     cv2.imshow("Frame", frame)
     '''
-    #140 250
-    if numFrames % 10 ==0 and numFrames >= 140 and numFrames <= 250:
+    #140 250 -> for video1
+    #60 150 -> for video2
+    if numFrames % 10 ==0 and numFrames >= 140 and numFrames <= 140:
         cv2.imshow("FrameRGB: " + str(numFrames), rgbFrames[-1])
         difference = ImagedDifference(yiqFrames[0], yiqFrames[-1], .05) 
         cv2.imshow("FrameDifference: " + str(numFrames),difference)
@@ -69,6 +70,7 @@ while(ret) :
             print(stats)
         else:
             print("Frame "  +str(numFrames)  + " not valid")
+        break
 
     ret,frame = video_object.read()  
 

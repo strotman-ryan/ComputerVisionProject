@@ -8,7 +8,7 @@ camera = PiCamera()
 
 
 
-videoPath = './Video/video2.h264'
+videoPath = './Video/video3.h264'
 camera.resolution = (1280, 720)
 camera.start_preview()
 sleep(3)
