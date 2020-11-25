@@ -4,8 +4,8 @@ from time import sleep
 import cv2 
 import numpy as np
 
+camera = PiCamera()
 resolution = (3280,2464)
-camera = PiCamera(resolution = resolution)
 camera.framerate = 15 #set to 15 fps
 
 videoPath = './Video/video4.h264'
