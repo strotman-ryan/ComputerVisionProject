@@ -5,6 +5,7 @@ import numpy as np
 from skimage.color import rgb2yiq
 from scipy.ndimage import binary_closing
 import math
+import matplotlib.pyplot as plt
 
 def Standardize(image):
     xMin = image.min()
@@ -48,11 +49,10 @@ def PolarToCartesian(r,theta,rho):
     z = r * math.cos(thetaRad)
     return x,y,z
 
-1280, 720
 #convert (x,y,diameter), to (x,y,z), (0,0,0) is camera
 def convertFromDiameterToCartesion(x,y,diameter):
     #constants
-    din = 4.75 #diameter of ball in inches
+    din = 2.75 #diameter of ball in inches
     w = 1280 #width of images in pixels   #TODO
     h = 720 #heigh of images in pixels   #TODO
     xFov = 62.3 #horizontal field of view in degrees
@@ -64,6 +64,13 @@ def convertFromDiameterToCartesion(x,y,diameter):
     theta = 90 - yFov/2 + y/h * yFov #angle from z axis (pointing straing up)
     xFinal,yFinal,zFinal = PolarToCartesian(radius,theta,rho)
     return xFinal, yFinal, zFinal
+
+def Magnitude(x,y,z):
+    return math.sqrt(x * x + y * y + z * z)
+
+#points are (x,y,z)
+def Distance(firstPoint, secondPoint):
+    return Magnitude(firstPoint[0] - secondPoint[0], firstPoint[1] - secondPoint[1], firstPoint[2] - secondPoint[2])
 
 '''
 #test convertFromDiameterToCartesion function
@@ -79,9 +86,14 @@ theta = 100
 rho = 170
 print(PolarToCartesian(r,theta,rho))
 '''
-
-video_path = "./Video/video3.h264"
+frameRate = 15 #frames per second
+timeBetweenFrames = 60 / frameRate #in seconds
+video_path = "./Video/video4.h264"
 video_object = cv2.VideoCapture(video_path)
+
+plt.scatter([1,2,4],[1,2,3])
+print("iddle")
+plt.show()
 
 yiqFrames = []
 rgbFrames = []
@@ -102,28 +114,46 @@ while(ret) :
     #140 250 -> for video1
     #60 150 -> for video2
     #70 150 -> for video 3
-    if numFrames % 10 ==0 and numFrames >= 70 and numFrames <= 170:
-        cv2.imshow("FrameRGB: " + str(numFrames), rgbFrames[-1])
-        difference = ImagedDifference(yiqFrames[0], yiqFrames[-1], .05) 
-        cv2.imshow("FrameDifference: " + str(numFrames),difference)
-        valid, difference = RemoveSmallComponents(difference)
-        if valid:
-            cv2.imshow("One Connected Component: " + str(numFrames), difference)           
-            difference = binary_closing(difference, iterations=10).astype(float)
-            cv2.imshow("After closing: " + str(numFrames), difference)
-            nb_components, output, stats, centroids = cv2.connectedComponentsWithStats(difference.astype(np.uint8), connectivity=8)
-            diameter = stats[1,2]
-            x = centroids[1][0]
-            y = centroids[1][1]
-            stats = (numFrames,x,y,diameter)
-            frameStats.append(stats)
-        else:
-            print("Frame "  +str(numFrames)  + " not valid")
-        break
+    #40 70 -> for video 4
+    #cv2.imshow("FrameRGB: " + str(numFrames), rgbFrames[-1])
+    difference = ImagedDifference(yiqFrames[0], yiqFrames[-1], .05) 
+    #cv2.imshow("FrameDifference: " + str(numFrames),difference)
+    valid, difference = RemoveSmallComponents(difference)
+    if valid:
+        #cv2.imshow("One Connected Component: " + str(numFrames), difference)           
+        difference = binary_closing(difference, iterations=10).astype(float)
+        #cv2.imshow("After closing: " + str(numFrames), difference)
+        nb_components, output, stats, centroids = cv2.connectedComponentsWithStats(difference.astype(np.uint8), connectivity=8)
+        diameter = stats[1,3]  #the max height of object in pixels
+        x = centroids[1][0]
+        y = centroids[1][1]
+        stats = (numFrames,x,y,diameter)
+        frameStats.append(stats)
+    else:
+        print("Frame "  +str(numFrames)  + " not valid")
+        
+        
 
     ret,frame = video_object.read()  
 
-print(frameStats)
+
+results = []
+for stats in frameStats:
+    results.append(convertFromDiameterToCartesion(stats[1], stats[2], stats[3]))
+
+speedArray = []
+frameArray = []
+for i in range(len(results) - 1):
+    distance = Distance(results[i], results[i+1])
+    speed = distance / timeBetweenFrames
+    speedArray.append(speed)
+    frameArray.append(i)
+    print(str(speed) + " inches/second")
+print("ready")
+plt.scatter(frameArray,speedArray)
+print("iddle")
+plt.show()
+print("dont")
 #.05 is best for threshold
 #d -> 4 3/4 inches
 '''
@@ -132,9 +162,3 @@ for threshold in range(4,10):
     difference = ImagedDifference(yiqFrames[0], yiqFrames[-1], threshold)
     cv2.imshow("difference"  + str(threshold), difference)
 '''
-
-
-
-
-
-cv2.waitKey(0)
