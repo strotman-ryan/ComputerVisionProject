@@ -91,15 +91,13 @@ timeBetweenFrames = 60 / frameRate #in seconds
 video_path = "./Video/video4.h264"
 video_object = cv2.VideoCapture(video_path)
 
-plt.scatter([1,2,4],[1,2,3])
-print("iddle")
-plt.show()
-
 yiqFrames = []
 rgbFrames = []
 frameStats = []
+differenceFrames = []
 ret,frame = video_object.read() 
 numFrames = 0
+PrintFrame = 33
 while(ret) :
     numFrames += 1
     rgbFrames.append(frame)
@@ -115,27 +113,39 @@ while(ret) :
     #60 150 -> for video2
     #70 150 -> for video 3
     #40 70 -> for video 4
-    #cv2.imshow("FrameRGB: " + str(numFrames), rgbFrames[-1])
+    #print for report
+    if PrintFrame == numFrames:
+        cv2.imshow("RGB " + str(numFrames), rgbFrames[-1])
+        cv2.imshow("YIQ " + str(numFrames), yiqFrames[-1])
+
     difference = ImagedDifference(yiqFrames[0], yiqFrames[-1], .05) 
-    #cv2.imshow("FrameDifference: " + str(numFrames),difference)
+    if PrintFrame == numFrames:
+        cv2.imshow("Raw Frame Difference: " + str(numFrames),difference)
     valid, difference = RemoveSmallComponents(difference)
     if valid:
-        #cv2.imshow("One Connected Component: " + str(numFrames), difference)           
+        if PrintFrame == numFrames:
+            cv2.imshow("One Connected Component: " + str(numFrames), difference)           
         difference = binary_closing(difference, iterations=10).astype(float)
-        #cv2.imshow("After closing: " + str(numFrames), difference)
+        if PrintFrame == numFrames:
+            cv2.imshow("After closing: " + str(numFrames), difference)
         nb_components, output, stats, centroids = cv2.connectedComponentsWithStats(difference.astype(np.uint8), connectivity=8)
         diameter = stats[1,3]  #the max height of object in pixels
         x = centroids[1][0]
         y = centroids[1][1]
         stats = (numFrames,x,y,diameter)
+        if PrintFrame == numFrames:
+            print(stats)
         frameStats.append(stats)
+        differenceFrames.append(difference)
     else:
         print("Frame "  +str(numFrames)  + " not valid")
-        
-        
-
     ret,frame = video_object.read()  
 
+differenceCombined = differenceFrames[0]
+for difference in differenceFrames:
+    differenceCombined = differenceCombined + difference
+
+cv2.imshow("Difference Combined", differenceCombined)
 
 results = []
 for stats in frameStats:
@@ -148,12 +158,16 @@ for i in range(len(results) - 1):
     speed = distance / timeBetweenFrames
     speedArray.append(speed)
     frameArray.append(i)
-    print(str(speed) + " inches/second")
-print("ready")
+
+cv2.waitKey()
+
+plt.title("Speed of ball at each frame")
+plt.xlabel("Frame number")
+plt.ylabel("Speed of ball (inch/s)")
 plt.scatter(frameArray,speedArray)
-print("iddle")
 plt.show()
-print("dont")
+
+
 #.05 is best for threshold
 #d -> 4 3/4 inches
 '''
