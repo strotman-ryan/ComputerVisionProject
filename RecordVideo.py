@@ -4,17 +4,16 @@ from time import sleep
 import cv2 
 import numpy as np
 
-camera = PiCamera()
-
-
+resolution = (3280,2464)
+camera = PiCamera(resolution = resolution)
+camera.framerate = 15 #set to 15 fps
 
 videoPath = './Video/video3.h264'
-camera.resolution = (1280, 720)
 camera.start_preview()
 sleep(3)
 print("starting recording")
 camera.start_recording(videoPath)
-camera.wait_recording(10)
+camera.wait_recording(7)
 camera.stop_recording()
 print("end of recording")
 
