@@ -8,7 +8,7 @@ resolution = (3280,2464)
 camera = PiCamera(resolution = resolution)
 camera.framerate = 15 #set to 15 fps
 
-videoPath = './Video/video3.h264'
+videoPath = './Video/video4.h264'
 camera.start_preview()
 sleep(3)
 print("starting recording")
