@@ -53,8 +53,8 @@ def PolarToCartesian(r,theta,rho):
 def convertFromDiameterToCartesion(x,y,diameter):
     #constants
     din = 2.75 #diameter of ball in inches
-    w = 1280 #width of images in pixels   #TODO
-    h = 720 #heigh of images in pixels   #TODO
+    w = 1280 #width of images in pixels 
+    h = 720 #heigh of images in pixels   
     xFov = 62.3 #horizontal field of view in degrees
     yFov = 48.8 #Vertical field of view in degrees
 
@@ -71,6 +71,22 @@ def Magnitude(x,y,z):
 #points are (x,y,z)
 def Distance(firstPoint, secondPoint):
     return Magnitude(firstPoint[0] - secondPoint[0], firstPoint[1] - secondPoint[1], firstPoint[2] - secondPoint[2])
+
+def CreateMask(radius, xCenter, yCenter):
+    w = 1280 #width of images in pixels 
+    h = 720 #heigh of images in pixels 
+    x = np.arange(0, w)
+    y = np.arange(0, h)
+    arr = np.zeros((y.size, x.size))
+    return (x[np.newaxis,:]-xCenter)**2 + (y[:,np.newaxis]-yCenter)**2 < radius**2
+
+def ShowBallCircle(difference, x, y, diameter):
+    mask = CreateMask(diameter/2, x,y)
+    differenceCopy = difference.copy()
+    differenceCopy[mask] = .5
+    cv2.imshow("Center " + str(numFrames), differenceCopy)
+    return
+
 
 '''
 #test convertFromDiameterToCartesion function
@@ -125,7 +141,7 @@ while(ret) :
     if valid:
         if PrintFrame == numFrames:
             cv2.imshow("One Connected Component: " + str(numFrames), difference)           
-        difference = binary_closing(difference, iterations=10).astype(float)
+        #difference = binary_closing(difference, iterations=10).astype(float)
         if PrintFrame == numFrames:
             cv2.imshow("After closing: " + str(numFrames), difference)
         nb_components, output, stats, centroids = cv2.connectedComponentsWithStats(difference.astype(np.uint8), connectivity=8)
@@ -133,7 +149,8 @@ while(ret) :
         x = centroids[1][0]
         y = centroids[1][1]
         stats = (numFrames,x,y,diameter)
-        if PrintFrame == numFrames:
+        if PrintFrame == numFrames: 
+            ShowBallCircle(difference,x,y,diameter)        
             print(stats)
         frameStats.append(stats)
         differenceFrames.append(difference)
@@ -151,22 +168,43 @@ results = []
 for stats in frameStats:
     results.append(convertFromDiameterToCartesion(stats[1], stats[2], stats[3]))
 
-speedArray = []
-frameArray = []
+print("Total distance traveled: " + str(Distance(results[0], results[-1])))
+
+DistanceArray = [] #distance between ith frame and ith + 1 frame
+TotalDistanceArray = [] #distance traveled from 0th frame to ith frame
+speedArray = []    #speed between ith frame and ith + 1 frame
+frameArray = []    #dummy array needed for graphing
+totalDistance = 0
 for i in range(len(results) - 1):
     distance = Distance(results[i], results[i+1])
+    totalDistance += distance   
     speed = distance / timeBetweenFrames
-    speedArray.append(speed)
+    DistanceArray.append(distance)
+    TotalDistanceArray.append(totalDistance)
+    speedArray.append(speed)    
     frameArray.append(i)
 
-cv2.waitKey()
+print("Total Distance traveled between first and last frame: " + str(Distance(results[0], results[-1])))
+print("Accumulative distance traveled:" + str(totalDistance))
+
+plt.title("Accumulative Distance Travled")
+plt.xlabel("Frame")
+plt.ylabel("Distance (inches)")
+plt.scatter(frameArray,TotalDistanceArray)
+plt.show()
+
+plt.title("Distance Traveled between each Frame")
+plt.xlabel("Frame (15 fps)")
+plt.ylabel("Distance (inches)")
+plt.scatter(frameArray, DistanceArray)
+plt.show()
 
 plt.title("Speed of ball at each frame")
 plt.xlabel("Frame number")
 plt.ylabel("Speed of ball (inch/s)")
 plt.scatter(frameArray,speedArray)
 plt.show()
-
+cv2.waitKey()
 
 #.05 is best for threshold
 #d -> 4 3/4 inches
