@@ -87,7 +87,6 @@ def ShowBallCircle(difference, x, y, diameter):
     cv2.imshow("Center " + str(numFrames), differenceCopy)
     return
 
-
 '''
 #test convertFromDiameterToCartesion function
 x = 100
@@ -103,7 +102,7 @@ rho = 170
 print(PolarToCartesian(r,theta,rho))
 '''
 frameRate = 15 #frames per second
-timeBetweenFrames = 60 / frameRate #in seconds
+timeBetweenFrames = 1 / frameRate #in seconds
 video_path = "./Video/video4.h264"
 video_object = cv2.VideoCapture(video_path)
 
@@ -118,13 +117,11 @@ while(ret) :
     numFrames += 1
     rgbFrames.append(frame)
     yiqFrames.append(rgb2yiq(frame))
-    '''
     # Press Q on keyboard to  exit
     #this makes the video play for some reason
     if cv2.waitKey(25) & 0xFF == ord('q'): 
       break
     cv2.imshow("Frame", frame)
-    '''
     #140 250 -> for video1
     #60 150 -> for video2
     #70 150 -> for video 3
@@ -141,7 +138,7 @@ while(ret) :
     if valid:
         if PrintFrame == numFrames:
             cv2.imshow("One Connected Component: " + str(numFrames), difference)           
-        #difference = binary_closing(difference, iterations=10).astype(float)
+        #difference = binary_closing(difference, iterations=10).astype(float) #this has neglible effect on outcome
         if PrintFrame == numFrames:
             cv2.imshow("After closing: " + str(numFrames), difference)
         nb_components, output, stats, centroids = cv2.connectedComponentsWithStats(difference.astype(np.uint8), connectivity=8)
@@ -163,11 +160,12 @@ for difference in differenceFrames:
     differenceCombined = differenceCombined + difference
 
 cv2.imshow("Difference Combined", differenceCombined)
-
 results = []
+DiameterArray = []
 for stats in frameStats:
     results.append(convertFromDiameterToCartesion(stats[1], stats[2], stats[3]))
-
+    DiameterArray.append(stats[3])
+print(DiameterArray)
 print("Total distance traveled: " + str(Distance(results[0], results[-1])))
 
 DistanceArray = [] #distance between ith frame and ith + 1 frame
@@ -188,19 +186,19 @@ print("Total Distance traveled between first and last frame: " + str(Distance(re
 print("Accumulative distance traveled:" + str(totalDistance))
 
 plt.title("Accumulative Distance Travled")
-plt.xlabel("Frame")
+plt.xlabel("Frame (at 15 fps)")
 plt.ylabel("Distance (inches)")
 plt.scatter(frameArray,TotalDistanceArray)
 plt.show()
 
 plt.title("Distance Traveled between each Frame")
-plt.xlabel("Frame (15 fps)")
+plt.xlabel("Frame (at 15 fps)")
 plt.ylabel("Distance (inches)")
 plt.scatter(frameArray, DistanceArray)
 plt.show()
 
 plt.title("Speed of ball at each frame")
-plt.xlabel("Frame number")
+plt.xlabel("Frame (at 15 fps)")
 plt.ylabel("Speed of ball (inch/s)")
 plt.scatter(frameArray,speedArray)
 plt.show()
